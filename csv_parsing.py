@@ -11,6 +11,7 @@ class ParsedValue:
 
 def wrong_extension_error():
 	print("Invalid extension")
+	exit()
 
 # open given file
 input_file_name = sys.argv[1]
