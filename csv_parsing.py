@@ -1,6 +1,10 @@
 import pymysql, configparser
 
 class ParsedValue:
+	"""
+	Class attributes : 
+	self.rows / self.column / self.delimiter / self.conn / self.curs
+	"""
 	def __init__(self, file_name):
 		self.rows = list()
 		self.open_file(file_name)
