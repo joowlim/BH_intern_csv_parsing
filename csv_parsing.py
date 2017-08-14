@@ -1,4 +1,4 @@
-import sys, pymysql, configparser
+import pymysql, configparser
 
 class ParsedValue:
 	def __init__(self, file_name):
