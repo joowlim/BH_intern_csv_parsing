@@ -38,18 +38,15 @@ class ParsedValue:
 		self.add_column(file_lines[0].strip("\n"))
 		for line in file_lines[1:]:
 			self.add_row(line.strip("\n"))
+	def db_connection(self):
+		config = configparser.ConfigParser()
+		config.read("./user_config.ini")
 
-config = configparser.ConfigParser()
-config.read("./user_config.ini")
+		server = config.get("DATABASE", "server")
+		user = config.get("DATABASE", "user")
+		password = config.get("DATABASE", "password")
+		schema = config.get("DATABASE", "schema")
 
-server = config.get("DATABASE", "server")
-user = config.get("DATABASE", "user")
-password = config.get("DATABASE", "password")
-schema = config.get("DATABASE", "schema")
-  
-conn = pymysql.connect(host = server, user = user, password = password, db = schema, charset = 'utf8')
-curs = conn.cursor()
+		self.conn = pymysql.connect(host = server, user = user, password = password, db = schema, charset = 'utf8')
+		self.curs = self.conn.cursor()
 
-# content
-# conn.commit()
-# conn.close()
