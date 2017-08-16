@@ -39,7 +39,7 @@ class ParsedValue:
 			self.open_excel_file(file_name)
 			
 		else:
-			wrong_extension_error()
+			self.wrong_extension_error()
 
 	def open_normal_file(self, file_name):
 		# open given file
