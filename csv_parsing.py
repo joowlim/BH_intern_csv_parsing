@@ -162,6 +162,6 @@ if __name__ == "__main__":
 		exit()
 	parsed_value = ParsedValue(file_name)
 	parsed_value.parse_to_insert()
-#column_id = parsed_value.insert_column_to_db()
-#parsed_value.insert_rows_to_db(column_id)
+# column_id = parsed_value.insert_column_to_db()
+# parsed_value.insert_rows_to_db(column_id)
 	
