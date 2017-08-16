@@ -68,9 +68,8 @@ class ParsedValue:
 		first_row = ''
 		for idx in range(len(first_row_as_list)):
 			first_row += str(first_row_as_list[idx].value)
-
 			if idx != len(first_row_as_list) -1:
-				first_row += ';'
+				first_row += self.delimiter
 				
 		self.add_column(first_row)
 		
