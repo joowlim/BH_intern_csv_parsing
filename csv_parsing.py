@@ -9,7 +9,7 @@ class ParsedValue:
 		# create config parser
 		self.config = configparser.ConfigParser()
 		self.config.read("./user_config.ini")
-		
+
 		self.rows = list()
 		self.open_file(file_name)
 		self.connect_db()
@@ -32,6 +32,7 @@ class ParsedValue:
 		if input_file_extension == "csv":
 			self.delimiter = self.config.get("DELIMITER", input_file_extension)
 			self.open_normal_file(file_name)
+
 
 		elif input_file_extension == "tsv":
 			self.delimiter = self.config.get("DELIMITER", input_file_extension)
@@ -142,19 +143,25 @@ class ParsedValue:
 			self.curs.execute(sql, tuple([column_id]+row))
 
 		self.conn.commit()
-		
-if len(sys.argv) != 2:
-	print("call like")
-	print("python3 csv_parsing.py your_file")
-	exit()
+	def parse_to_insert(self):
+		self.add_column_if_needed()
+		column_id = self.insert_column_to_db()
+		self.insert_rows_to_db(column_id)
 
-file_name = sys.argv[1]
-if os.path.exists(file_name) is False:
-	print("the file is not exist")
-	print("check your file")
-	exit()
+if __name__ == "__main__":
+	# without argument
+	if len(sys.argv) != 2:
+		print("call like")	
+		print("python3 csv_parsing.py your_file")
+		exit()
 
-parsed_value = ParsedValue(file_name)
+	file_name = sys.argv[1]
+	if os.path.exists(file_name) is False:
+		print("the file is not exist")
+		print("check your file")
+		exit()
+	parsed_value = ParsedValue(file_name)
+	parsed_value.parse_to_insert()
 # column_id = parsed_value.insert_column_to_db()
 # parsed_value.insert_rows_to_db(column_id)
 	
