@@ -20,22 +20,25 @@ class ParsedValue:
 	def add_row(self, line):
 		self.rows.append(line.split(self.delimiter))
 
-	
 	def open_file(self, file_name):
+		# create config parser
+		config = configparser.ConfigParser()
+		config.read("./user_config.ini")
 
 		# detect extension
 		input_file_extension = file_name.split(".")[-1]
 
 		# set delimiter
 		if input_file_extension == "csv":
-			self.delimiter = ';'
+			self.delimiter = config.get("DELIMITER", input_file_extension)
 			self.open_normal_file(file_name)
-		elif input_file_extension == "tsb":
-			self.delimiter = '\t'
+
+		elif input_file_extension == "tsv":
+			self.delimiter = config.get("DELIMITER", input_file_extension)
 			self.open_normal_file(file_name)
 			
 		elif input_file_extension == "xlsx":
-			self.delimiter = ';'
+			self.delimiter = config.get("DELIMITER", input_file_extension)
 			self.open_excel_file(file_name)
 			
 		else:
@@ -54,7 +57,6 @@ class ParsedValue:
 		for line in file_lines[1:]:
 			self.add_row(line.strip("\n"))
 
-		
 	def open_excel_file(self, file_name):
 		excel_document = openpyxl.load_workbook(file_name)
 		sheet_name = excel_document.get_sheet_names()[0]
@@ -67,7 +69,7 @@ class ParsedValue:
 		for idx in range(len(first_row_as_list)):
 			first_row += str(first_row_as_list[idx].value)
 			if idx != len(first_row_as_list) -1:
-				first_row += ';'
+				first_row += self.delimiter
 				
 		self.add_column(first_row)
 		
@@ -76,9 +78,8 @@ class ParsedValue:
 			for idx in range(len(each_row)):
 				temp_each_row += str(each_row[idx].value)
 				if idx != len(each_row) -1:
-					temp_each_row += ';'
+					temp_each_row += self.delimiter
 			self.add_row(temp_each_row)
-
 
 	def connect_db(self):
 		config = configparser.ConfigParser()
