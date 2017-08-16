@@ -1,4 +1,4 @@
-import pymysql, configparser, os, sys
+import pymysql, configparser, os, sys, openpyxl
 
 class ParsedValue:
 	"""
@@ -22,12 +22,6 @@ class ParsedValue:
 
 	
 	def open_file(self, file_name):
-		# open given file
-		input_file = open(file_name, "r")
-
-		# read given file
-		file_lines = input_file.readlines()
-		input_file.close()
 
 		# detect extension
 		input_file_extension = file_name.split(".")[-1]
@@ -35,15 +29,57 @@ class ParsedValue:
 		# set delimiter
 		if input_file_extension == "csv":
 			self.delimiter = ';'
+			self.open_normal_file(file_name)
 		elif input_file_extension == "tsb":
 			self.delimiter = '\t'
+			self.open_normal_file(file_name)
+			
+		elif input_file_extension == "xlsx":
+			self.delimiter = ';'
+			self.open_excel_file(file_name)
+			
 		else:
 			wrong_extension_error()
 
+	def open_normal_file(self, file_name):
+		# open given file
+		input_file = open(file_name, "r")
+
+		# read given file
+		file_lines = input_file.readlines()
+		input_file.close()
+		
 		# parse contents
 		self.add_column(file_lines[0].strip("\n"))
 		for line in file_lines[1:]:
 			self.add_row(line.strip("\n"))
+		
+		
+	def open_excel_file(self, file_name):
+		excel_document = openpyxl.load_workbook(file_name)
+		sheet_name = excel_document.get_sheet_names()[0]
+		sheet = excel_document.get_sheet_by_name(sheet_name)
+		rows = list(sheet.rows)
+		first_row_as_list = rows[0]
+		num_of_column = len(first_row_as_list)
+		
+		first_row = ''
+		for idx in range(len(first_row_as_list)):
+			first_row += str(first_row_as_list[idx].value)
+			if idx != len(first_row_as_list) -1 :
+				first_row += ';'
+				
+		self.add_column(first_row)
+		
+		for each_row in rows[1:]:
+			temp_each_row = ''
+			for idx in range(len(each_row)):
+				temp_each_row += str(each_row[idx].value)
+				if idx != len(each_row) -1:
+					temp_each_row += '; '
+			self.add_row(temp_each_row)
+		
+
 	def connect_db(self):
 		config = configparser.ConfigParser()
 		config.read("./user_config.ini")
@@ -110,6 +146,8 @@ if os.path.exists(file_name) is False:
 	exit()
 
 parsed_value = ParsedValue(file_name)
+col_id = parsed_value.insert_column_to_db()
+parsed_value.insert_rows_to_db(col_id)
 # column_id = parsed_value.insert_column_to_db()
 # parsed_value.insert_rows_to_db(column_id)
 	
