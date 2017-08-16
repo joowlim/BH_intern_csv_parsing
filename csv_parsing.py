@@ -66,7 +66,7 @@ class ParsedValue:
 		first_row = ''
 		for idx in range(len(first_row_as_list)):
 			first_row += str(first_row_as_list[idx].value)
-			if idx != len(first_row_as_list) -1 :
+			if idx != len(first_row_as_list) -1:
 				first_row += ';'
 				
 		self.add_column(first_row)
@@ -76,7 +76,7 @@ class ParsedValue:
 			for idx in range(len(each_row)):
 				temp_each_row += str(each_row[idx].value)
 				if idx != len(each_row) -1:
-					temp_each_row += '; '
+					temp_each_row += ';'
 			self.add_row(temp_each_row)
 
 
