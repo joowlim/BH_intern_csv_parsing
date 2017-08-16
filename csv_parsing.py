@@ -44,6 +44,7 @@ class ParsedValue:
 		self.add_column(file_lines[0].strip("\n"))
 		for line in file_lines[1:]:
 			self.add_row(line.strip("\n"))
+
 	def connect_db(self):
 		config = configparser.ConfigParser()
 		config.read("./user_config.ini")
@@ -79,11 +80,22 @@ class ParsedValue:
 			self.conn.commit()
 
 	def insert_column_to_db(self):
-		sql = "INSERT INTO COLUMN_INFO (column_info, delimiter) VALUES (%s, %s)"
-		self.curs.execute(sql, (self.delimiter.join(self.columns), self.delimiter))
-		
+		# check if there already exist column in db
+		sql = "SELECT column_info_id, column_info FROM COLUMN_INFO WHERE column_info = \"" + self.delimiter.join(self.columns) +"\""
+		self.curs.execute(sql)
+		column = self.curs.fetchone()
+
+		if column == None:
+			sql = "INSERT INTO COLUMN_INFO (column_info, delimiter) VALUES (%s, %s)"
+			self.curs.execute(sql, (self.delimiter.join(self.columns), self.delimiter))
+			result = self.curs.lastrowid
+		else:
+			(column_info_id, column_info) = column
+			result = column_info_id
+	
 		self.conn.commit()
-		return self.curs.lastrowid
+
+		return result
 
 	def insert_rows_to_db(self, column_id):
 		for row in self.rows:
@@ -110,6 +122,6 @@ if os.path.exists(file_name) is False:
 	exit()
 
 parsed_value = ParsedValue(file_name)
-# column_id = parsed_value.insert_column_to_db()
+#column_id = parsed_value.insert_column_to_db()
 # parsed_value.insert_rows_to_db(column_id)
 	
