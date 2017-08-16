@@ -6,6 +6,10 @@ class ParsedValue:
 	self.rows / self.columns / self.delimiter / self.conn / self.curs
 	"""
 	def __init__(self, file_name):
+		# create config parser
+		self.config = configparser.ConfigParser()
+		self.config.read("./user_config.ini")
+		
 		self.rows = list()
 		self.open_file(file_name)
 		self.connect_db()
@@ -21,24 +25,20 @@ class ParsedValue:
 		self.rows.append(line.split(self.delimiter))
 
 	def open_file(self, file_name):
-		# create config parser
-		config = configparser.ConfigParser()
-		config.read("./user_config.ini")
-
 		# detect extension
 		input_file_extension = file_name.split(".")[-1]
 
 		# set delimiter
 		if input_file_extension == "csv":
-			self.delimiter = config.get("DELIMITER", input_file_extension)
+			self.delimiter = self.config.get("DELIMITER", input_file_extension)
 			self.open_normal_file(file_name)
 
 		elif input_file_extension == "tsv":
-			self.delimiter = config.get("DELIMITER", input_file_extension)
+			self.delimiter = self.config.get("DELIMITER", input_file_extension)
 			self.open_normal_file(file_name)
 			
 		elif input_file_extension == "xlsx":
-			self.delimiter = config.get("DELIMITER", input_file_extension)
+			self.delimiter = self.config.get("DELIMITER", input_file_extension)
 			self.open_excel_file(file_name)
 			
 		else:
@@ -82,13 +82,10 @@ class ParsedValue:
 			self.add_row(temp_each_row)
 
 	def connect_db(self):
-		config = configparser.ConfigParser()
-		config.read("./user_config.ini")
-
-		server = config.get("DATABASE", "server")
-		user = config.get("DATABASE", "user")
-		password = config.get("DATABASE", "password")
-		schema = config.get("DATABASE", "schema")
+		server = self.config.get("DATABASE", "server")
+		user = self.config.get("DATABASE", "user")
+		password = self.config.get("DATABASE", "password")
+		schema = self.config.get("DATABASE", "schema")
 
 		self.conn = pymysql.connect(host = server, user = user, password = password, db = schema, charset = 'utf8')
 		self.curs = self.conn.cursor()
