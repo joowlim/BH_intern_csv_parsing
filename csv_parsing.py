@@ -122,6 +122,6 @@ if os.path.exists(file_name) is False:
 	exit()
 
 parsed_value = ParsedValue(file_name)
-#column_id = parsed_value.insert_column_to_db()
+# column_id = parsed_value.insert_column_to_db()
 # parsed_value.insert_rows_to_db(column_id)
 	
