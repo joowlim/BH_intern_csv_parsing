@@ -3,7 +3,7 @@ import pymysql, configparser, os, sys, openpyxl
 class ParsedValue:
 	"""
 	Class attributes : 
-	self.rows / self.columns / self.delimiter / self.conn / self.curs
+	self.rows / self.columns / self.delimiter / self.conn / self.curs / self.config
 	"""
 	def __init__(self, file_name):
 		# create config parser
@@ -103,12 +103,12 @@ class ParsedValue:
 		if current_num_of_column < len(self.columns):
 			column_add_sql = "ALTER TABLE FILE_DATA "
 			
-			for i in range(current_num_of_column,len(self.columns)):
+			for i in range(current_num_of_column, len(self.columns)):
 				column_add_sql += "ADD COLUMN column" + str(i + 1) + " VARCHAR(100)"
 				if i != len(self.columns) - 1:
 					column_add_sql += ", "
 					
-			num_of_column_update_sql = "UPDATE TABLE_INFO SET num_of_column = " + str(len(self.columns)) +" WHERE table_info_id=1"
+			num_of_column_update_sql = "UPDATE TABLE_INFO SET num_of_column = " + str(len(self.columns)) + " WHERE table_info_id=1"
 			self.curs.execute(column_add_sql)
 			self.curs.execute(num_of_column_update_sql)
 			self.conn.commit()
