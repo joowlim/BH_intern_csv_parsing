@@ -3,7 +3,7 @@ import pymysql, configparser, os, sys, openpyxl
 class ParsedValue:
 	"""
 	Class attributes : 
-	self.rows / self.columns / self.delimiter / self.conn / self.curs
+	self.rows / self.columns / self.delimiter / self.conn / self.curs / self.config
 	"""
 	def __init__(self, file_name):
 		# create config parser
@@ -69,7 +69,7 @@ class ParsedValue:
 		first_row = ''
 		for idx in range(len(first_row_as_list)):
 			first_row += str(first_row_as_list[idx].value)
-			if idx != len(first_row_as_list) -1:
+			if idx != len(first_row_as_list) - 1:
 				first_row += self.delimiter
 				
 		self.add_column(first_row)
@@ -78,7 +78,7 @@ class ParsedValue:
 			temp_each_row = ''
 			for idx in range(len(each_row)):
 				temp_each_row += str(each_row[idx].value)
-				if idx != len(each_row) -1:
+				if idx != len(each_row) - 1:
 					temp_each_row += self.delimiter
 			self.add_row(temp_each_row)
 
@@ -103,19 +103,19 @@ class ParsedValue:
 		if current_num_of_column < len(self.columns):
 			column_add_sql = "ALTER TABLE FILE_DATA "
 			
-			for i in range(current_num_of_column,len(self.columns)):
-				column_add_sql += "ADD COLUMN column" + str(i+1) + " VARCHAR(100)"
-				if i != len(self.columns)-1:
-					column_add_sql+=", "
+			for i in range(current_num_of_column, len(self.columns)):
+				column_add_sql += "ADD COLUMN column" + str(i + 1) + " VARCHAR(100)"
+				if i != len(self.columns) - 1:
+					column_add_sql += ", "
 					
-			num_of_column_update_sql = "UPDATE TABLE_INFO SET num_of_column = " + str(len(self.columns)) +" WHERE table_info_id=1"
+			num_of_column_update_sql = "UPDATE TABLE_INFO SET num_of_column = " + str(len(self.columns)) + " WHERE table_info_id=1"
 			self.curs.execute(column_add_sql)
 			self.curs.execute(num_of_column_update_sql)
 			self.conn.commit()
 
 	def insert_column_to_db(self):
 		# check if there already exist column in db
-		sql = "SELECT column_info_id, column_info FROM COLUMN_INFO WHERE column_info = \"" + self.delimiter.join(self.columns) +"\""
+		sql = "SELECT column_info_id, column_info FROM COLUMN_INFO WHERE column_info = \"" + self.delimiter.join(self.columns) + "\""
 		self.curs.execute(sql)
 		column = self.curs.fetchone()
 
@@ -135,12 +135,12 @@ class ParsedValue:
 		for row in self.rows:
 			sql = "INSERT INTO FILE_DATA (column_info_id"
 			for i in range(len(row)):
-				sql = sql + ", column" + str(i+1)
+				sql = sql + ", column" + str(i + 1)
 			sql = sql + ") VALUES ("
 			for i in range(len(row)):
 				sql = sql + "%s, "
 			sql = sql + "%s)"
-			self.curs.execute(sql, tuple([column_id]+row))
+			self.curs.execute(sql, tuple([column_id] + row))
 
 		self.conn.commit()
 	def parse_to_insert(self):
