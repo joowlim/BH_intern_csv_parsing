@@ -5,18 +5,23 @@ class ParsedValue:
 	Class attributes : 
 	self.rows / self.columns / self.delimiter / self.conn / self.curs / self.config
 	"""
-	def __init__(self, file_name):
+	def __init__(self):
 		# create config parser
 		self.config = configparser.ConfigParser()
-		self.config.read("./user_config.ini")
-
 		self.rows = list()
-		self.open_file(file_name)
-		self.connect_db()
 
 	def wrong_extension_error(self):
 		print("Invalid extension")
 		exit()
+
+	def connect_db_by_file(self, file_path):
+		self.config.read(file_path)
+
+		self.connect_db()
+
+	def connect_db_by_argument(self, server, user, password, schema):
+		self.conn = pymysql.connect(host = server, user = user, password = password, db = schema, charset = 'utf8')
+		self.curs = self.conn.cursor()
 
 	def add_column(self, line):
 		self.columns = line.split(self.delimiter)
@@ -24,22 +29,24 @@ class ParsedValue:
 	def add_row(self, line):
 		self.rows.append(line.split(self.delimiter))
 
-	def open_file(self, file_name):
+	def open_file_and_set_delimiter(self, file_name, delimiter = None):
 		# detect extension
 		input_file_extension = file_name.split(".")[-1]
 
 		# set delimiter
-		if input_file_extension == "csv":
+		if delimiter == None:
 			self.delimiter = self.config.get("DELIMITER", input_file_extension)
+		else:
+			self.delimiter = delimiter
+
+		# set delimiter
+		if input_file_extension == "csv":
 			self.open_normal_file(file_name)
 
-
 		elif input_file_extension == "tsv":
-			self.delimiter = self.config.get("DELIMITER", input_file_extension)
 			self.open_normal_file(file_name)
 			
 		elif input_file_extension == "xlsx":
-			self.delimiter = self.config.get("DELIMITER", input_file_extension)
 			self.open_excel_file(file_name)
 			
 		else:
@@ -143,6 +150,7 @@ class ParsedValue:
 			self.curs.execute(sql, tuple([column_id] + row))
 
 		self.conn.commit()
+
 	def parse_to_insert(self):
 		self.add_column_if_needed()
 		column_id = self.insert_column_to_db()
@@ -156,12 +164,22 @@ if __name__ == "__main__":
 		exit()
 
 	file_name = sys.argv[1]
+
 	if os.path.exists(file_name) is False:
 		print("the file is not exist")
 		print("check your file")
 		exit()
-	parsed_value = ParsedValue(file_name)
+
+	# by file
+	parsed_value = ParsedValue()
+	parsed_value.connect_db_by_file("./user_config.ini")
+	parsed_value.open_file_and_set_delimiter(file_name)
 	parsed_value.parse_to_insert()
-# column_id = parsed_value.insert_column_to_db()
-# parsed_value.insert_rows_to_db(column_id)
-	
+	"""
+	# by argument
+	parsed_value2 = ParsedValue()
+	parsed_value2.connect_db_by_argument("localhost", "root", "root", "csv_like_parser")
+	parsed_value2.open_file_and_set_delimiter("../sample.csv", delimiter = ";")
+	parsed_value2.parse_to_insert()
+	"""
+
