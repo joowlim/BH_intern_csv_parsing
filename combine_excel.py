@@ -27,12 +27,12 @@ for (column_info_id, column_info) in columns:
         sheet = combined_excel.create_sheet()
     else:
         sheet = combined_excel.active
-    columns = column_info.split(',')
+    column_name_list = column_info.split(',')
     sql_file_data = "SELECT * FROM FILE_DATA WHERE column_info_id = " + str(column_info_id)
     curs.execute(sql_file_data)
     data_tuples = curs.fetchall()
-    for column_name in columns:
-        sheet.cell(row = 1, column = columns.index(column_name) + 1).value = column_name
+    for column_name in column_name_list:
+        sheet.cell(row = 1, column = column_name_list.index(column_name) + 1).value = column_name
     for data_tuple in data_tuples:
         for j in range(1, len(columns) + 1):
             sheet.cell(row = data_tuples.index(data_tuple) + 2, column = j).value = data_tuple[j+1]
