@@ -6,8 +6,7 @@ class ParsedValue:
 	self.rows / self.columns / self.delimiter / self.conn / self.curs / self.config
 	"""
 	def __init__(self):
-		# create config parser
-		self.config = configparser.ConfigParser()
+		
 		self.rows = list()
 
 	def wrong_extension_error(self):
@@ -15,8 +14,10 @@ class ParsedValue:
 		exit()
 
 	def connect_db_by_file(self, file_path):
+		
+		# create config parser
+		self.config = configparser.ConfigParser()
 		self.config.read(file_path)
-
 		self.connect_db()
 
 	def connect_db_by_argument(self, server, user, password, schema):
@@ -35,7 +36,11 @@ class ParsedValue:
 
 		# set delimiter
 		if delimiter == None:
-			self.delimiter = self.config.get("DELIMITER", input_file_extension)
+			if hasattr(self,'config') == False:
+				print("input your delimiter >> ", end='')
+				self.delimiter = input()
+			else:
+				self.delimiter = self.config.get("DELIMITER", input_file_extension)
 		else:
 			self.delimiter = delimiter
 
@@ -158,6 +163,7 @@ class ParsedValue:
 
 if __name__ == "__main__":
 	# without argument
+	
 	if len(sys.argv) != 2:
 		print("call like")	
 		print("python3 csv_parsing.py your_file")
@@ -169,17 +175,18 @@ if __name__ == "__main__":
 		print("the file is not exist")
 		print("check your file")
 		exit()
-
+	
 	# by file
-	parsed_value = ParsedValue()
-	parsed_value.connect_db_by_file("./user_config.ini")
-	parsed_value.open_file_and_set_delimiter(file_name)
-	parsed_value.parse_to_insert()
+	#parsed_value = ParsedValue()
+	#parsed_value.connect_db_by_file("./user_config.ini")
+	#parsed_value.open_file_and_set_delimiter(file_name)
+	#parsed_value.parse_to_insert()
 	"""
 	# by argument
 	parsed_value2 = ParsedValue()
 	parsed_value2.connect_db_by_argument("localhost", "root", "root", "csv_like_parser")
-	parsed_value2.open_file_and_set_delimiter("../sample.csv", delimiter = ";")
+	parsed_value2.open_file_and_set_delimiter("./report.csv")
 	parsed_value2.parse_to_insert()
 	"""
+	
 
