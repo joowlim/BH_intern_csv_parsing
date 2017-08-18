@@ -4,7 +4,7 @@ class ParsedValue:
 	"""
 	Class attributes : 
 	self.rows / self.columns / self.delimiter / self.conn / self.curs / self.config
-	fortest
+
 	"""
 	def __init__(self):
 		
