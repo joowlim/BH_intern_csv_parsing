@@ -8,11 +8,18 @@ class ParsedValue:
 	def __init__(self):
 		
 		self.rows = list()
-
+		
 	def wrong_extension_error(self):
 		print("Invalid extension")
 		exit()
+		
+	# database relative function -----
+	def connect_db(self, server, user, password, schema):
 
+		self.conn = pymysql.connect(host = server, user = user, password = password, charset = 'utf8')
+		self.curs = self.conn.cursor()
+		self.init_all_database_if_not_exists(schema)
+		
 	def check_db_exists(self, schema):
 		sql = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + schema + "'"
 		self.curs.execute(sql)
@@ -86,7 +93,10 @@ class ParsedValue:
 		
 	def connect_db_by_argument(self, server, user, password, schema):
 		self.connect_db(server,user,password,schema)
-		
+	
+	# end database relative function -----
+	
+	
 	def add_column(self, line):
 		self.columns = line.split(self.delimiter)
 
@@ -157,11 +167,7 @@ class ParsedValue:
 					temp_each_row += self.delimiter
 			self.add_row(temp_each_row)
 
-	def connect_db(self, server, user, password, schema):
 
-		self.conn = pymysql.connect(host = server, user = user, password = password, charset = 'utf8')
-		self.curs = self.conn.cursor()
-		self.init_all_database_if_not_exists(schema)
 	
 	def get_current_num_of_column(self):
 		sql = "SELECT num_of_column FROM TABLE_INFO"
