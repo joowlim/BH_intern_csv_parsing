@@ -35,12 +35,12 @@ for (column_info_id, column_info, delimiter) in columns:
 	for column_name in column_name_list:
 		sheet.cell(row = 1, column = column_name_list.index(column_name) + 1).value = column_name
 		
-	bar = progressbar.ProgressBar(maxval=len(data_tuples), widgets=[progressbar.Bar('=',"sheet : " + str(sheet_idx) + "/" + str(len(columns))+ ' [', ']'), ' ',progressbar.SimpleProgress()])
+	bar = progressbar.ProgressBar(maxval = len(data_tuples), widgets = [progressbar.Bar('=', "sheet : " + str(sheet_idx) + "/" + str(len(columns)) + ' [', ']'), ' ', progressbar.SimpleProgress()])
 	bar.start()
 	idx = 1
 	for data_tuple in data_tuples:
 		for j in range(1, len(column_name_list) + 1):
-			sheet.cell(row = data_tuples.index(data_tuple) + 2, column = j).value = data_tuple[j+1]
+			sheet.cell(row = data_tuples.index(data_tuple) + 2, column = j).value = data_tuple[j + 1]
 		bar.update(idx)
 		idx += 1
 	sheet_check = 0
