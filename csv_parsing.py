@@ -215,7 +215,7 @@ class ParsedValue:
 		return result
 		
 	def init_progressbar(self, max_value):
-		bar = progressbar.ProgressBar(maxval = 100, widgets = [progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+		bar = progressbar.ProgressBar(maxval = 100, widgets = [progressbar.Bar('=', '[', ']'), ' ', progressbar.SimpleProgress()])
 		bar.start()
 		return bar
 	def update_progressbar(self, bar, current):
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 	# by argument
 	parsed_value2 = ParsedValue()
 	parsed_value2.connect_db_by_argument("localhost", "root", "root", "name")
-	parsed_value2.open_file_and_set_delimiter("./report.csv",';')
+	parsed_value2.open_file_and_set_delimiter("./test.csv",';')
 	parsed_value2.parse_to_insert()
 	
 	
