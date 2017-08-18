@@ -1,4 +1,4 @@
-import pymysql, configparser, os, sys, openpyxl
+import pymysql, configparser, os, sys, openpyxl, progressbar
 
 class ParsedValue:
 	"""
@@ -16,7 +16,12 @@ class ParsedValue:
 	# database relative function -----
 	def connect_db(self, server, user, password, schema):
 
-		self.conn = pymysql.connect(host = server, user = user, password = password, charset = 'utf8')
+		try:
+			self.conn = pymysql.connect(host = server, user = user, password = password, charset = 'utf8')
+		except:
+			print("cannot connect database server")
+			print("check server connection info")
+			exit()
 		self.curs = self.conn.cursor()
 		self.init_all_database_if_not_exists(schema)
 		
@@ -96,7 +101,7 @@ class ParsedValue:
 	
 	# end database relative function -----
 	
-	
+
 	def add_column(self, line):
 		self.columns = line.split(self.delimiter)
 
@@ -208,8 +213,19 @@ class ParsedValue:
 		self.conn.commit()
 
 		return result
+		
+	def init_progressbar(self, max_value):
+		bar = progressbar.ProgressBar(maxval = 100, widgets = [progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+		bar.start()
+		return bar
+	def update_progressbar(self, bar, current):
+		bar.update(current)
 
+		
 	def insert_rows_to_db(self, column_id):
+		max_value_of_progressbar = len(self.rows)
+		bar = self.init_progressbar(max_value_of_progressbar)
+		idx = 1
 		for row in self.rows:
 			sql = "INSERT INTO FILE_DATA (column_info_id"
 			for i in range(len(row)):
@@ -219,8 +235,12 @@ class ParsedValue:
 				sql = sql + "%s, "
 			sql = sql + "%s)"
 			self.curs.execute(sql, tuple([column_id] + row))
-
+			self.update_progressbar(bar, 100 * idx / max_value_of_progressbar)
+			idx += 1
+		bar.finish()
 		self.conn.commit()
+		print("finished")
+		
 
 	def parse_to_insert(self):
 		self.add_column_if_needed()
@@ -242,17 +262,19 @@ if __name__ == "__main__":
 		print("check your file")
 		exit()
 	"""
+	"""
 	# by file
 	parsed_value = ParsedValue()
 	parsed_value.connect_db_by_file("./user_config.ini")
 	parsed_value.open_file_and_set_delimiter("./report.csv")
 	parsed_value.parse_to_insert()
+	"""
 	
 	# by argument
-	#parsed_value2 = ParsedValue()
-	#parsed_value2.connect_db_by_argument("localhost", "root", "root", "name")
-	#parsed_value2.open_file_and_set_delimiter("./report.csv",';')
-	#parsed_value2.parse_to_insert()
+	parsed_value2 = ParsedValue()
+	parsed_value2.connect_db_by_argument("localhost", "root", "root", "name")
+	parsed_value2.open_file_and_set_delimiter("./report.csv",';')
+	parsed_value2.parse_to_insert()
 	
 	
 
