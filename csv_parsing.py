@@ -13,17 +13,80 @@ class ParsedValue:
 		print("Invalid extension")
 		exit()
 
+	def check_db_exists(self, schema):
+		sql = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + schema + "'"
+		self.curs.execute(sql)
+		
+		if self.curs.fetchone() == None:
+			return False
+		
+		use_database_sql = "USE " + schema
+		self.curs.execute(use_database_sql)
+		self.conn.commit()
+		return True
+		
+	def table_init_if_not_exist(self):
+		create_column_info_table_sql = "CREATE TABLE IF NOT EXISTS COLUMN_INFO("\
+											"column_info_id INT(11) NOT NULL primary key auto_increment,"\
+											"column_info VARCHAR(500) NOT NULL,"\
+											"`delimiter` VARCHAR(5) NOT NULL"\
+										");"
+										
+		create_file_data_table_sql = "CREATE TABLE IF NOT EXISTS FILE_DATA("\
+										"file_data_id INT(11) NOT NULL primary key auto_increment,"\
+										"column_info_id INT(11) NOT NULL,"\
+										"column1 varchar(100)"\
+									");"
+									
+		create_table_info_table_sql = "CREATE TABLE IF NOT EXISTS  TABLE_INFO("\
+											"table_info_id INT(11) NOT NULL primary key auto_increment,"\
+											"num_of_column INT(11)"\
+											");"
+		self.curs.execute(create_column_info_table_sql)
+		self.curs.execute(create_file_data_table_sql)
+		self.curs.execute(create_table_info_table_sql)
+		self.conn.commit()
+		
+		select_table_info_sql = "SELECT * FROM TABLE_INFO"
+		self.curs.execute(select_table_info_sql)
+		result = self.curs.fetchone()
+		
+		if result == None:
+			insert_table_info_sql = "INSERT INTO TABLE_INFO(num_of_column) VALUES(1)"
+			self.curs.execute(insert_table_info_sql)
+		self.conn.commit()
+		
+	def initialize_db_schema(self, schema):
+		
+		create_schema_sql = "CREATE SCHEMA " + schema + " DEFAULT CHARACTER SET utf8 "
+		use_database_sql = "USE " + schema
+		self.curs.execute(create_schema_sql)
+		self.curs.execute(use_database_sql)
+		self.conn.commit()
+		
+		
 	def connect_db_by_file(self, file_path):
 		
 		# create config parser
 		self.config = configparser.ConfigParser()
 		self.config.read(file_path)
-		self.connect_db()
+		
+		server = self.config.get("DATABASE", "server")
+		user = self.config.get("DATABASE", "user")
+		password = self.config.get("DATABASE", "password")
+		schema = self.config.get("DATABASE", "schema")
+		
+		self.connect_db(server, user, password, schema)
 
+	def init_all_database_if_not_exists(self,schema):
+	
+		if self.check_db_exists(schema) == False:
+			self.initialize_db_schema(schema)
+		self.table_init_if_not_exist()
+		
 	def connect_db_by_argument(self, server, user, password, schema):
-		self.conn = pymysql.connect(host = server, user = user, password = password, db = schema, charset = 'utf8')
-		self.curs = self.conn.cursor()
-
+		self.connect_db(server,user,password,schema)
+		
 	def add_column(self, line):
 		self.columns = line.split(self.delimiter)
 
@@ -94,14 +157,11 @@ class ParsedValue:
 					temp_each_row += self.delimiter
 			self.add_row(temp_each_row)
 
-	def connect_db(self):
-		server = self.config.get("DATABASE", "server")
-		user = self.config.get("DATABASE", "user")
-		password = self.config.get("DATABASE", "password")
-		schema = self.config.get("DATABASE", "schema")
+	def connect_db(self, server, user, password, schema):
 
-		self.conn = pymysql.connect(host = server, user = user, password = password, db = schema, charset = 'utf8')
+		self.conn = pymysql.connect(host = server, user = user, password = password, charset = 'utf8')
 		self.curs = self.conn.cursor()
+		self.init_all_database_if_not_exists(schema)
 	
 	def get_current_num_of_column(self):
 		sql = "SELECT num_of_column FROM TABLE_INFO"
@@ -163,7 +223,7 @@ class ParsedValue:
 
 if __name__ == "__main__":
 	# without argument
-	
+	"""
 	if len(sys.argv) != 2:
 		print("call like")	
 		print("python3 csv_parsing.py your_file")
@@ -175,18 +235,18 @@ if __name__ == "__main__":
 		print("the file is not exist")
 		print("check your file")
 		exit()
-	
+	"""
 	# by file
-	#parsed_value = ParsedValue()
-	#parsed_value.connect_db_by_file("./user_config.ini")
-	#parsed_value.open_file_and_set_delimiter(file_name)
-	#parsed_value.parse_to_insert()
-	"""
+	parsed_value = ParsedValue()
+	parsed_value.connect_db_by_file("./user_config.ini")
+	parsed_value.open_file_and_set_delimiter("./report.csv")
+	parsed_value.parse_to_insert()
+	
 	# by argument
-	parsed_value2 = ParsedValue()
-	parsed_value2.connect_db_by_argument("localhost", "root", "root", "csv_like_parser")
-	parsed_value2.open_file_and_set_delimiter("./report.csv")
-	parsed_value2.parse_to_insert()
-	"""
+	#parsed_value2 = ParsedValue()
+	#parsed_value2.connect_db_by_argument("localhost", "root", "root", "name")
+	#parsed_value2.open_file_and_set_delimiter("./report.csv",';')
+	#parsed_value2.parse_to_insert()
+	
 	
 
