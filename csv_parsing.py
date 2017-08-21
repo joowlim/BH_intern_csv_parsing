@@ -251,13 +251,16 @@ class ParsedValue:
 if __name__ == "__main__":
 	# without argument
 	"""
+	need modifying
+	
 	if len(sys.argv) != 2:
 		print("call like")	
 		print("python3 csv_parsing.py your_file")
 		exit()
 
 	file_name = sys.argv[1]
-
+	delimiter = sys.argv[2]
+	
 	if os.path.exists(file_name) is False:
 		print("the file is not exist")
 		print("check your file")
@@ -267,14 +270,14 @@ if __name__ == "__main__":
 	# by file
 	parsed_value = ParsedValue()
 	parsed_value.connect_db_by_file("./user_config.ini")
-	parsed_value.open_file_and_set_delimiter("./report.csv")
+	parsed_value.open_file_and_set_delimiter(file_name)
 	parsed_value.parse_to_insert()
 	"""
 	
 	# by argument
 	parsed_value2 = ParsedValue()
-	parsed_value2.connect_db_by_argument("localhost", "root", "root", "name")
-	parsed_value2.open_file_and_set_delimiter("./test.csv",';')
+	parsed_value2.connect_db_by_argument("localhost", "id", "password", "schema_name")
+	parsed_value2.open_file_and_set_delimiter(file_name,delimiter)
 	parsed_value2.parse_to_insert()
 	
 	
